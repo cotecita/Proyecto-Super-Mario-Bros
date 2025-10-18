@@ -1,0 +1,17 @@
+# Ignorar entorno virtual
+mario-env/
+
+# Archivos Python compilados
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Jupyter notebooks checkpoints
+.ipynb_checkpoints/
+
+# Archivos de logs
+*.log
+# Archivos de sistema
+.DS_Store
+Thumbs.db
