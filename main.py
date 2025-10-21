@@ -14,6 +14,7 @@ from utils import timestamp #para guardar carpetas con modelos
 
 ENV_NAME = "SuperMarioBros-1-1-v0" #nivel a usar
 TRAIN_MODE = True            # True: agente aprende, False: juega en base a lo aprendido
+LOAD_PREVIOUS = False #continuar entrenamiento desde un modelo guardado
 TOTAL_EPISODES = 1000  #número de episodios para el train
 SAVE_INTERVAL = 100    #cada cuantos episodios se guardan los modelos
 DISPLAY = True               # True para ver el juego
@@ -42,12 +43,24 @@ agent = MarioAgent(
     device=DEVICE                     #recurso que usa
 )
 
+# Continuar entrenamiento desde modelo guardado
+if LOAD_PREVIOUS:
+    ckpt_dir = "models/2025-10-18_22-35"  # carpeta del modelo
+    ckpt_file = "model_20000.pt"          # modelo a cargar para continuar
+    agent.load(os.path.join(ckpt_dir, ckpt_file))
+    if TRAIN_MODE:
+        print(f"Continuando entrenamiento desde {ckpt_file}")
+    else:
+        agent.epsilon = 0.0
+        print(f"Jugando usando modelo {ckpt_file}")
+
 # Si quiere aplicar lo aprendido (JUGAR)
+"""
 if not TRAIN_MODE:
     ckpt_dir = "models/2025-10-16_20-00"     #definircarpeta e que esta el modelo
     ckpt_file = "model_50.pt"         #definir modelo
     agent.load(os.path.join(ckpt_dir, ckpt_file))     #cargar modelo       
-    agent.epsilon = 0.0  # sin exploración
+    agent.epsilon = 0.0  # sin exploración"""
 
 
 #  LOOP PRINCIPAL 
