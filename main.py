@@ -1,6 +1,7 @@
 #librerías necesarias
 import os
 import time
+import datetime
 import torch #aprendizaje profundo
 import gym_super_mario_bros #crear entorno
 from nes_py.wrappers import JoypadSpace  #restringir movimientos
@@ -9,6 +10,11 @@ from gym_super_mario_bros.actions import SIMPLE_MOVEMENT #movimientos que puede 
 from wrappers import create_wrapped_env #función para preprocesar imagenes
 from agent import MarioAgent #donde esta el agente DQN
 from utils import timestamp #para guardar carpetas con modelos
+
+def timestamp() -> str:
+    """Devuelve string tipo '2025-10-16_21-45' para nombres de carpetas/modelos."""
+    return datetime.datetime.now().strftime("%Y-%m-%d_%H-%M")
+
 
 #  CONFIGURACIÓN INICIAL
 
