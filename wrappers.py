@@ -7,13 +7,8 @@ Salida final: observaciones en formato (C, H, W) uint8 con frame stack (C=4).
 from typing import Tuple
 import numpy as np
 
-try:
-    import gymnasium as gym
-    from gymnasium.wrappers import GrayScaleObservation, ResizeObservation, FrameStack
-except Exception:
-    # Fallback a gym clásico si fuese necesario
-    import gym
-    from gym.wrappers import GrayScaleObservation, ResizeObservation, FrameStack
+import gym
+from gym.wrappers import GrayScaleObservation, ResizeObservation, FrameStack
 
 
 class SkipFrame(gym.Wrapper):

@@ -9,7 +9,7 @@ from gym_super_mario_bros.actions import SIMPLE_MOVEMENT #movimientos que puede 
 
 from wrappers import create_wrapped_env #función para preprocesar imagenes
 from agent import MarioAgent #donde esta el agente DQN
-from utils import timestamp #para guardar carpetas con modelos
+#from utils import timestamp #para guardar carpetas con modelos
 
 def timestamp() -> str:
     """Devuelve string tipo '2025-10-16_21-45' para nombres de carpetas/modelos."""
@@ -23,7 +23,7 @@ TRAIN_MODE = True            # True: agente aprende, False: juega en base a lo a
 LOAD_PREVIOUS = False #continuar entrenamiento desde un modelo guardado
 TOTAL_EPISODES = 1000  #número de episodios para el train
 SAVE_INTERVAL = 100    #cada cuantos episodios se guardan los modelos
-DISPLAY = True               # True para ver el juego
+DISPLAY = True              # True para ver el juego
 RENDER_SPEED = 1/60          # controla la velocidad de los frames (~60 FPS)
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu") #usar GPU de estar disponible, sino CPU
@@ -78,6 +78,9 @@ for ep in range(1, TOTAL_EPISODES + 1):         #resetear entorno luego de un ep
     done = False          #episodio en ejecución, es true cuando mario muere o completa el nivel         
     total_reward = 0.0      #recompensa acumulada
     steps = 0
+    stuck_counter = 0      # contador para detectar si Mario está atascado
+    prev_x = 0             # posición previa de Mario
+
 
     #bucle por cada frame del juego
     while not done: #mientras no muera/complete el nivel
@@ -90,7 +93,43 @@ for ep in range(1, TOTAL_EPISODES + 1):         #resetear entorno luego de un ep
         #DECISIÓN
         action = agent.select_action(state)  #elige movimiento
         next_state, reward, done, trunc, info = env.step(action) #por cada paso retorna siguiente_imagen;recompensa por el paso;si muere/completa nivel; truncamiento del ep;indormación del entorno adicional
-        total_reward += reward #recompensa acumulada
+
+        # ---------------- Recompensa refinada ----------------
+        current_x = info.get("x_pos", 0)
+        delta_x = current_x - prev_x
+
+        r = delta_x * 0.25  # recompensa base por avanzar
+
+        if delta_x == 0:
+            r -= 0.05  # leve castigo por no moverse
+        elif delta_x < 0:
+            r -= 1.0   # castigo moderado por retroceder
+
+        if info.get("y_pos", 0) < 80:
+            r += 0.1
+
+        if abs(delta_x) < 1:
+            stuck_counter += 1
+        else:
+            stuck_counter = 0
+
+        if stuck_counter > 45:  # aprox 0.75 seg quieto
+            r -= 1.0
+            stuck_counter = 0
+
+        # Penalización por morir
+        if done and not info.get("flag_get", False):
+            r -= 10
+
+        # Bonus por terminar nivel
+        if info.get("flag_get", False):
+            r += 1000
+
+        prev_x = current_x  # actualizar posición previa
+
+        # Combinar recompensa del juego con la personalizada
+        total_reward += reward + r
+
         #APRENDIZAJE
         if TRAIN_MODE:
             agent.remember(state, action, reward, next_state, done) #guarda la transición
