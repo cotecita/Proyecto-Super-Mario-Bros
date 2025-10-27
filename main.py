@@ -19,8 +19,8 @@ def timestamp() -> str:
 #  CONFIGURACIÓN INICIAL
 
 ENV_NAME = "SuperMarioBros-1-1-v0" #nivel a usar
-TRAIN_MODE = True            # True: agente aprende, False: juega en base a lo aprendido
-LOAD_PREVIOUS = False #continuar entrenamiento desde un modelo guardado
+TRAIN_MODE = False            # True: agente aprende, False: juega en base a lo aprendido
+LOAD_PREVIOUS = True #continuar entrenamiento desde un modelo guardado
 TOTAL_EPISODES = 1000  #número de episodios para el train
 SAVE_INTERVAL = 100    #cada cuantos episodios se guardan los modelos
 DISPLAY = True              # True para ver el juego
@@ -51,8 +51,8 @@ agent = MarioAgent(
 
 # Continuar entrenamiento desde modelo guardado
 if LOAD_PREVIOUS:
-    ckpt_dir = "models/2025-10-18_22-35"  # carpeta del modelo
-    ckpt_file = "model_20000.pt"          # modelo a cargar para continuar
+    ckpt_dir = "models/2025-10-26_19-10"  # carpeta del modelo
+    ckpt_file = "model_13000.pt"          # modelo a cargar para continuar
     agent.load(os.path.join(ckpt_dir, ckpt_file))
     if TRAIN_MODE:
         print(f"Continuando entrenamiento desde {ckpt_file}")
@@ -93,7 +93,8 @@ for ep in range(1, TOTAL_EPISODES + 1):         #resetear entorno luego de un ep
         #DECISIÓN
         action = agent.select_action(state)  #elige movimiento
         next_state, reward, done, trunc, info = env.step(action) #por cada paso retorna siguiente_imagen;recompensa por el paso;si muere/completa nivel; truncamiento del ep;indormación del entorno adicional
-
+        total_reward += reward
+        '''
         # ---------------- Recompensa refinada ----------------
         current_x = info.get("x_pos", 0)
         delta_x = current_x - prev_x
@@ -129,7 +130,7 @@ for ep in range(1, TOTAL_EPISODES + 1):         #resetear entorno luego de un ep
 
         # Combinar recompensa del juego con la personalizada
         total_reward += reward + r
-
+ '''
         #APRENDIZAJE
         if TRAIN_MODE:
             agent.remember(state, action, reward, next_state, done) #guarda la transición
